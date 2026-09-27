@@ -1,1 +1,958 @@
+<!DOCTYPE html>
+<html lang="tr" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Çöl X App</title>
+<link id="appFavicon" rel="icon" href="">
+<link id="appTouchIcon" rel="apple-touch-icon" href="">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta id="appTitleMeta" name="apple-mobile-web-app-title" content="Çöl X App">
+<style>
+:root{
+  --bg:#090f25;--line:rgba(255,255,255,0.07);
+  --text:#f0f3ff;--muted:#8a9ac0;
+  --field:rgba(28,36,70,0.8);--field-b:rgba(255,255,255,0.09);
+  --accent:#3d9fc0;--accent2:#2d7d96;
+  --panel:rgba(14,20,48,0.97);
+  --card:rgba(20,28,60,0.85);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:Tahoma,Arial,sans-serif;color:var(--text);
+  background:linear-gradient(160deg,#060c1e 0%,#0b1228 60%,#080f20 100%)}
+body{padding:10px}
+.shell{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
 
+/* ── NAV ── */
+.nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 18px}
+.nav-logo{font-size:19px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px}
+.nav-logo img{height:34px;border-radius:8px;display:none}
+.nav-actions{display:flex;gap:7px;flex-wrap:wrap}
+
+/* ── TABS ── */
+.tabs-bar{display:flex;gap:5px;background:var(--panel);border:1px solid var(--line);
+  border-radius:13px;padding:7px;flex-wrap:wrap;align-items:center}
+.tab-btn{padding:8px 16px;border-radius:9px;border:none;cursor:pointer;font-size:13px;
+  font-weight:600;background:transparent;color:var(--muted);transition:all .15s;
+  display:flex;align-items:center;gap:5px;position:relative}
+.tab-btn.active{background:var(--accent2);color:#fff}
+.tab-btn:hover:not(.active){background:rgba(255,255,255,0.06);color:var(--text)}
+.tab-btn .cnt{background:rgba(255,255,255,0.14);border-radius:20px;padding:1px 7px;font-size:11px}
+.tab-btn .del-tab{display:none;position:absolute;top:-6px;right:-6px;width:18px;height:18px;
+  border-radius:50%;background:#c62828;color:#fff;font-size:10px;align-items:center;
+  justify-content:center;border:none;cursor:pointer;line-height:1}
+.tab-btn:hover .del-tab{display:flex}
+.tab-add{margin-left:auto;padding:8px 13px;border-radius:9px;border:1px dashed rgba(255,255,255,0.18);
+  cursor:pointer;background:transparent;color:var(--muted);font-size:13px;
+  display:flex;align-items:center;gap:4px;transition:all .15s}
+.tab-add:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── LAYOUT ── */
+.main{display:grid;grid-template-columns:1fr 350px;gap:10px}
+@media(max-width:880px){.main{grid-template-columns:1fr}}
+
+/* ── PANELS ── */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}
+.ph{padding:14px 18px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pt{font-size:15px;font-weight:700;color:#fff;display:flex;align-items:center;gap:7px}
+.pb{padding:14px 18px}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:600;
+  display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn:not(:disabled):active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover:not(:disabled){filter:brightness(1.1)}
+.btn-ghost{background:rgba(255,255,255,0.06);color:var(--muted);border:1px solid var(--line)}
+.btn-ghost:hover:not(:disabled){color:#fff;border-color:rgba(255,255,255,0.2)}
+.btn-danger{background:rgba(198,40,40,.18);color:#ff8080;border:1px solid rgba(229,57,53,.3)}
+.btn-purple{background:linear-gradient(180deg,#7c4dff,#5e35b1);color:#fff;
+  border:1px solid rgba(180,130,255,.3)}
+.btn-purple.rec{background:linear-gradient(180deg,#c62828,#b71c1c);
+  animation:pulse 1.2s infinite}
+.btn-sm{padding:6px 12px;font-size:12px;border-radius:8px}
+.btn-full{width:100%;justify-content:center}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(229,57,53,.4)}50%{box-shadow:0 0 0 7px transparent}}
+.rec-dot{width:8px;height:8px;border-radius:50%;background:#ff6060;display:none;
+  animation:blink .8s ease-in-out infinite}
+.btn-purple.rec .rec-dot{display:inline-block}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── PRODUCTS GRID ── */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:10px;padding:12px}
+.pcard{background:var(--card);border:1px solid var(--line);border-radius:11px;
+  overflow:hidden;cursor:pointer;transition:all .15s;position:relative}
+.pcard:hover{border-color:rgba(61,159,192,.4);background:rgba(22,32,70,.95)}
+.pcard.sel{border-color:var(--accent)}
+.pcard.sel::after{content:'✓';position:absolute;top:7px;right:7px;
+  background:var(--accent);color:#fff;width:20px;height:20px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.pimg{width:100%;height:120px;object-fit:cover;background:rgba(14,20,50,.8);display:block}
+.pph{width:100%;height:120px;display:flex;align-items:center;justify-content:center;
+  background:rgba(14,20,50,.8);font-size:34px}
+.pinfo{padding:9px 11px}
+.pname{font-size:12px;font-weight:700;color:#fff;margin-bottom:3px;line-height:1.3}
+.pmeta{font-size:11px;color:var(--muted)}
+.pqrow{display:flex;align-items:center;gap:5px;margin-top:7px}
+.qbtn{width:24px;height:24px;border-radius:6px;border:1px solid var(--field-b);
+  background:rgba(30,44,80,.9);color:#fff;cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:background .1s}
+.qbtn:hover{background:var(--accent2)}
+.qval{flex:1;height:24px;border-radius:6px;border:1px solid var(--field-b);
+  background:rgba(30,44,80,.9);color:#fff;text-align:center;font-size:13px;font-weight:700;outline:none}
+.qval.hi{border-color:rgba(124,77,255,.6);box-shadow:0 0 8px rgba(124,77,255,.25)}
+
+/* ── SEARCH ── */
+.sinput{height:34px;border-radius:9px;border:1px solid var(--field-b);
+  background:var(--field);color:#fff;padding:0 12px;font-size:13px;outline:none;width:150px}
+.sinput:focus{border-color:var(--accent)}
+
+/* ── FORM FIELDS ── */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.fl label{display:block;font-size:12px;font-weight:600;margin-bottom:5px;color:var(--muted)}
+.fl input{width:100%;height:38px;border-radius:9px;border:1px solid var(--field-b);
+  background:var(--field);color:#fff;padding:0 12px;font-size:13px;outline:none}
+.fl input:focus{border-color:var(--accent)}
+
+/* ── ORDER LIST ── */
+.olist{max-height:240px;overflow-y:auto;margin-bottom:12px}
+.oitem{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--line)}
+.oitem:last-child{border-bottom:none}
+.oimg{width:36px;height:36px;border-radius:7px;object-fit:cover;background:rgba(20,28,60,.8);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:18px}
+.oname{flex:1;font-size:12px;font-weight:600;color:#fff}
+.oqty{font-size:11px;color:var(--muted)}
+.odel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 5px}
+.odel:hover{color:#ff6060}
+.oempty{text-align:center;padding:28px;color:var(--muted);font-size:13px}
+
+/* ── AI CHAT ── */
+.chat-panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;
+  display:flex;flex-direction:column;overflow:hidden}
+.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;
+  min-height:260px;max-height:340px}
+.msg{max-width:88%;padding:9px 13px;border-radius:11px;font-size:13px;line-height:1.5}
+.msg.ai{background:rgba(20,28,60,.95);border:1px solid var(--line);color:var(--text);
+  align-self:flex-start;border-bottom-left-radius:3px}
+.msg.usr{background:rgba(30,90,115,.4);border:1px solid rgba(61,159,192,.25);
+  color:#fff;align-self:flex-end;border-bottom-right-radius:3px}
+.msg.typing{color:var(--muted);font-style:italic}
+.msg.action{background:rgba(80,40,160,.18);border:1px solid rgba(124,77,255,.3);
+  color:#c8aaff;align-self:flex-start;border-bottom-left-radius:3px}
+.cinput-row{padding:10px 14px;border-top:1px solid var(--line);display:flex;gap:7px;align-items:flex-end}
+.cinput{flex:1;background:var(--field);border:1px solid var(--field-b);border-radius:10px;
+  color:#fff;padding:9px 12px;font-size:13px;outline:none;resize:none;font-family:inherit;
+  min-height:38px;max-height:90px}
+.cinput:focus{border-color:var(--accent)}
+
+/* ── MSGS FEEDBACK ── */
+.fmsg{padding:10px 14px;border-radius:10px;font-size:13px;margin-top:8px;display:none}
+.fmsg.ok{background:rgba(10,90,50,.2);border:1px solid rgba(70,200,130,.25);color:#a0f0c0}
+.fmsg.err{background:rgba(120,20,20,.2);border:1px solid rgba(255,100,100,.2);color:#ffaaaa}
+.plink{display:block;color:#80c0ff;margin-top:5px;word-break:break-all}
+
+/* ── MODAL ── */
+.mback{position:fixed;inset:0;background:rgba(0,0,0,.75);
+  display:flex;align-items:center;justify-content:center;z-index:200;padding:14px}
+.modal{background:#0c1330;border:1px solid rgba(255,255,255,.1);border-radius:18px;
+  width:100%;max-width:500px;max-height:92vh;overflow-y:auto}
+.modal.wide{max-width:680px}
+.mhdr{padding:18px 22px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between}
+.mtitle{font-size:16px;font-weight:700;color:#fff}
+.mclose{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;line-height:1}
+.mclose:hover{color:#fff}
+.mbody{padding:18px 22px;display:flex;flex-direction:column;gap:13px}
+.mfooter{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+.mf label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)}
+.mf input,.mf select,.mf textarea{width:100%;border-radius:9px;border:1px solid var(--field-b);
+  background:var(--field);color:#fff;padding:9px 13px;font-size:13px;outline:none;font-family:inherit}
+.mf textarea{min-height:60px;resize:vertical}
+.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--accent)}
+.mf select option{background:#0c1330}
+.mgrid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ppreview{width:100%;height:130px;border-radius:9px;object-fit:cover;
+  background:rgba(14,20,50,.8);display:none;margin-top:7px}
+
+/* ── ADMIN GRID ── */
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:9px;padding:14px}
+.acard{background:rgba(20,28,60,.8);border:1px solid var(--line);border-radius:11px;overflow:hidden}
+.acard img,.acard .aph{width:100%;height:100px;object-fit:cover;
+  display:flex;align-items:center;justify-content:center;background:rgba(12,18,44,.8);font-size:28px}
+.acard img{display:block}
+.acinfo{padding:9px 11px}
+.acname{font-size:12px;font-weight:700;color:#fff;margin-bottom:2px}
+.acmeta{font-size:11px;color:var(--muted)}
+.acact{padding:7px 11px;border-top:1px solid var(--line);display:flex;gap:5px}
+
+/* ── SETTINGS PANEL ── */
+.settings-section{border-top:1px solid var(--line);padding-top:14px;margin-top:4px}
+.settings-title{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;
+  text-transform:uppercase;letter-spacing:.5px}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(100,170,210,.3);border-radius:99px}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-logo">
+    <img id="navLogo" alt="logo">
+    <span id="navTitle">Çöl X App</span>
+  </div>
+  <div class="nav-actions">
+    <button class="btn btn-purple" id="voiceBtn" onclick="toggleVoice()">
+      🎙️ <span id="vbtxt">Sesli Sipariş</span>
+      <span class="rec-dot"></span>
+    </button>
+    <button class="btn btn-ghost" onclick="openAdmin()">⚙️ Yönetici</button>
+    <button class="btn btn-ghost btn-sm" onclick="openSettings()">🔧 Ayarlar</button>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-bar" id="tabsBar">
+  <button class="tab-add" onclick="openTabModal()">＋ Sayfa Ekle</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- Products -->
+  <div class="panel">
+    <div class="ph">
+      <div class="pt">🔧 <span id="tabTitle">Ürünler</span></div>
+      <div style="display:flex;gap:7px;align-items:center">
+        <input class="sinput" id="srch" placeholder="Ara..." oninput="renderProducts()">
+        <button class="btn btn-primary btn-sm" onclick="openAddProduct()">＋ Ürün</button>
+      </div>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+  </div>
+
+  <!-- Right column -->
+  <div style="display:flex;flex-direction:column;gap:10px">
+
+    <!-- Order -->
+    <div class="panel">
+      <div class="ph">
+        <div class="pt">📋 Sipariş</div>
+        <button class="btn btn-ghost btn-sm" onclick="clearOrder()">Temizle</button>
+      </div>
+      <div class="pb">
+        <div class="fgrid">
+          <div class="fl"><label>Proje Adı</label>
+            <input type="text" id="projName" placeholder="2. Kat Tesisatı"></div>
+          <div class="fl"><label>Tarih</label>
+            <input type="text" id="projDate" readonly></div>
+        </div>
+        <div class="olist" id="olist"><div class="oempty">Henüz ürün seçilmedi</div></div>
+        <button class="btn btn-primary btn-full" onclick="submitOrder()" id="subBtn">📄 PDF Oluştur</button>
+        <div id="omsg" class="fmsg"></div>
+      </div>
+    </div>
+
+    <!-- AI Chat -->
+    <div class="chat-panel">
+      <div class="ph">
+        <div class="pt">🤖 AI Asistan</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" id="speakToggle" onclick="toggleSpeak()"
+            title="AI sesli konuşsun">🔊</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearChat()">Temizle</button>
+        </div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="cinput-row">
+        <textarea class="cinput" id="cinput" placeholder="Soru sorun veya sipariş verin..."
+          rows="1" onkeydown="ckd(event)"></textarea>
+        <button class="btn btn-primary btn-sm" onclick="sendChat()">↑</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODAL: Add/Edit Product -->
+<div id="pmModal" class="mback" style="display:none" onclick="mbg(event,'pmModal')">
+<div class="modal" onclick="event.stopPropagation()">
+  <div class="mhdr">
+    <div class="mtitle" id="pmTitle">Ürün Ekle</div>
+    <button class="mclose" onclick="cm('pmModal')">×</button>
+  </div>
+  <div class="mbody">
+    <input type="hidden" id="eid">
+    <div class="mf"><label>Ürün Adı *</label>
+      <input type="text" id="pn" placeholder="DİRSEK (90)"></div>
+    <div class="mgrid2">
+      <div class="mf"><label>Çap / Boyut</label>
+        <input type="text" id="ps" placeholder="20"></div>
+      <div class="mf"><label>Birim</label>
+        <input type="text" id="pu" placeholder="adet"></div>
+    </div>
+    <div class="mf"><label>Sayfa *</label>
+      <select id="pcat"></select></div>
+    <div class="mf"><label>Resim URL (Google Drive veya herhangi)</label>
+      <input type="text" id="pimg" placeholder="https://..." oninput="prvImg()">
+      <img id="pimgpv" class="ppreview" alt="önizleme"></div>
+    <div class="mf"><label>Emoji (resim yoksa gösterilir)</label>
+      <input type="text" id="pem" placeholder="🔧" maxlength="4"></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-ghost" onclick="cm('pmModal')">İptal</button>
+    <button class="btn btn-primary" onclick="saveProd()">Kaydet</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: Add Tab -->
+<div id="tabModal" class="mback" style="display:none" onclick="mbg(event,'tabModal')">
+<div class="modal" onclick="event.stopPropagation()">
+  <div class="mhdr">
+    <div class="mtitle">Yeni Sayfa</div>
+    <button class="mclose" onclick="cm('tabModal')">×</button>
+  </div>
+  <div class="mbody">
+    <div class="mf"><label>Sayfa Adı *</label>
+      <input type="text" id="tname" placeholder="Fosseptik Tesisatı"></div>
+    <div class="mf"><label>İkon (emoji)</label>
+      <input type="text" id="ticon" placeholder="🔩" maxlength="4"></div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-ghost" onclick="cm('tabModal')">İptal</button>
+    <button class="btn btn-primary" onclick="saveTab()">Oluştur</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: Admin -->
+<div id="adminModal" class="mback" style="display:none" onclick="mbg(event,'adminModal')">
+<div class="modal wide" onclick="event.stopPropagation()">
+  <div class="mhdr">
+    <div class="mtitle">⚙️ Yönetici Paneli</div>
+    <button class="mclose" onclick="cm('adminModal')">×</button>
+  </div>
+  <div style="padding:12px 16px;border-bottom:1px solid var(--line);
+      display:flex;align-items:center;justify-content:space-between;gap:10px">
+    <select id="afcat" onchange="renderAdmin()"
+      style="height:32px;border-radius:8px;border:1px solid var(--field-b);
+      background:var(--field);color:#fff;padding:0 10px;font-size:13px;outline:none;flex:1">
+      <option value="">Tüm Sayfalar</option>
+    </select>
+    <span id="acnt" style="font-size:13px;color:var(--muted)"></span>
+    <button class="btn btn-primary btn-sm" onclick="openAddProduct()">＋ Ürün Ekle</button>
+  </div>
+  <div class="agrid" id="agrid"></div>
+  <div class="mfooter">
+    <button class="btn btn-ghost" onclick="cm('adminModal')">Kapat</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL: Settings -->
+<div id="settModal" class="mback" style="display:none" onclick="mbg(event,'settModal')">
+<div class="modal" onclick="event.stopPropagation()">
+  <div class="mhdr">
+    <div class="mtitle">🔧 Uygulama Ayarları</div>
+    <button class="mclose" onclick="cm('settModal')">×</button>
+  </div>
+  <div class="mbody">
+    <div class="mf"><label>Uygulama Adı</label>
+      <input type="text" id="stAppName" placeholder="Çöl X App"></div>
+    <div class="mf"><label>Logo URL</label>
+      <input type="text" id="stLogo" placeholder="https://..."></div>
+    <div class="mf"><label>Favicon / Uygulama İkonu URL</label>
+      <input type="text" id="stIcon" placeholder="https://..."></div>
+    <div class="settings-section">
+      <div class="settings-title">AI Entegrasyonu</div>
+      <div class="mf"><label>Gemini API Key (Ücretsiz / رایگان)</label>
+        <input type="password" id="stApiKey" placeholder="AIza...">
+        <div style="font-size:11px;color:var(--muted);margin-top:5px">
+          Ücretsiz API anahtarı almak için:
+          <a href="https://aistudio.google.com/apikey" target="_blank" 
+            style="color:var(--accent)">aistudio.google.com/apikey</a> → Get API Key → Create API Key
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mfooter">
+    <button class="btn btn-ghost" onclick="cm('settModal')">İptal</button>
+    <button class="btn btn-primary" onclick="saveSettings()">Kaydet</button>
+  </div>
+</div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let tabs=[], products=[], order={}, chatHist=[];
+let curTab=null, recognition=null, isRec=false;
+let speakEnabled=false, anthropicKey='';
+
+const SK_TABS='cx_tabs', SK_PRODS='cx_products', SK_SETT='cx_settings';
+
+/* ══════════════════════════════════════════════
+   STORAGE
+══════════════════════════════════════════════ */
+function loadLocal(){
+  try{
+    const t=localStorage.getItem(SK_TABS);
+    const p=localStorage.getItem(SK_PRODS);
+    const s=localStorage.getItem(SK_SETT);
+    if(t) tabs=JSON.parse(t);
+    if(p) products=JSON.parse(p);
+    if(s){
+      const st=JSON.parse(s);
+      if(st.apiKey) anthropicKey=st.apiKey;
+    }
+  }catch(e){}
+  if(!tabs.length) tabs=[
+    {id:'tab_1',name:'Sıcak Su',icon:'🔥'},
+    {id:'tab_2',name:'Soğuk Su',icon:'💧'},
+    {id:'tab_3',name:'Fosseptik',icon:'🔩'},
+    {id:'tab_4',name:'Montaj',icon:'🔧'},
+  ];
+  if(!products.length) products=[
+    {id:'p1',name:'BEYAZ TEMİZ SU BORU 4Mt',size:'20',unit:'adet',category:'tab_1',emoji:'🚿',image_url:''},
+    {id:'p2',name:'DİRSEK(90)',size:'20',unit:'adet',category:'tab_1',emoji:'🔄',image_url:''},
+    {id:'p3',name:'DİRSEK(45)',size:'20',unit:'adet',category:'tab_1',emoji:'↪️',image_url:''},
+    {id:'p4',name:'MANŞON',size:'20',unit:'adet',category:'tab_1',emoji:'🔗',image_url:''},
+    {id:'p5',name:'TE PARÇA',size:'20',unit:'adet',category:'tab_1',emoji:'🔀',image_url:''},
+    {id:'p6',name:'SIVA ALTI BATARYA BAĞLANTISI',size:'20',unit:'adet',category:'tab_1',emoji:'🚿',image_url:''},
+    {id:'p7',name:'ÇİFTLİ BATARYA BAĞLANTISI',size:'20',unit:'adet',category:'tab_1',emoji:'🚿',image_url:''},
+    {id:'p8',name:'KÖRTAPA',size:'20',unit:'adet',category:'tab_1',emoji:'🔒',image_url:''},
+    {id:'p9',name:'PVC BORU',size:'110',unit:'mt',category:'tab_3',emoji:'⬛',image_url:''},
+    {id:'p10',name:'PVC DİRSEK',size:'110',unit:'adet',category:'tab_3',emoji:'↩️',image_url:''},
+    {id:'p11',name:'PVC TE PARÇA',size:'110',unit:'adet',category:'tab_3',emoji:'🔀',image_url:''},
+    {id:'p12',name:'VİDA M8',size:'M8',unit:'adet',category:'tab_4',emoji:'🔩',image_url:''},
+    {id:'p13',name:'SOMUN M8',size:'M8',unit:'adet',category:'tab_4',emoji:'⭕',image_url:''},
+  ];
+}
+
+function persist(){
+  try{
+    localStorage.setItem(SK_TABS,JSON.stringify(tabs));
+    localStorage.setItem(SK_PRODS,JSON.stringify(products));
+  }catch(e){}
+  if(typeof google!=='undefined'){
+    google.script.run.saveTabs(tabs);
+    google.script.run.saveProducts(products);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════ */
+function renderTabs(){
+  const bar=document.getElementById('tabsBar');
+  const add=bar.querySelector('.tab-add');
+  bar.querySelectorAll('.tab-btn').forEach(b=>b.remove());
+  tabs.forEach(t=>{
+    const cnt=products.filter(p=>p.category===t.id).length;
+    const b=document.createElement('button');
+    b.className='tab-btn'+(curTab===t.id?' active':'');
+    b.innerHTML=`${t.icon||'📁'} ${t.name} <span class="cnt">${cnt}</span>`+
+      `<button class="del-tab" onclick="delTab('${t.id}',event)" title="Sil">×</button>`;
+    b.onclick=e=>{if(!e.target.classList.contains('del-tab')) switchTab(t.id);};
+    bar.insertBefore(b,add);
+  });
+}
+
+function switchTab(id){
+  curTab=id;
+  const t=tabs.find(x=>x.id===id);
+  document.getElementById('tabTitle').textContent=t?t.name:'Ürünler';
+  renderTabs(); renderProducts();
+}
+
+function delTab(id,e){
+  e.stopPropagation();
+  if(!confirm('Bu sayfayı silmek istediğinizden emin misiniz? (Ürünler silinmez)')) return;
+  tabs=tabs.filter(t=>t.id!==id);
+  if(curTab===id) curTab=tabs[0]?.id||null;
+  persist(); renderTabs();
+  if(curTab) switchTab(curTab);
+}
+
+function openTabModal(){
+  document.getElementById('tname').value='';
+  document.getElementById('ticon').value='';
+  document.getElementById('tabModal').style.display='flex';
+}
+
+function saveTab(){
+  const name=document.getElementById('tname').value.trim();
+  const icon=document.getElementById('ticon').value.trim()||'📁';
+  if(!name){alert('Sayfa adı giriniz');return;}
+  const id='tab_'+Date.now();
+  tabs.push({id,name,icon});
+  persist(); cm('tabModal'); renderTabs(); switchTab(id);
+}
+
+/* ══════════════════════════════════════════════
+   PRODUCTS
+══════════════════════════════════════════════ */
+function normImg(url){
+  const v=String(url||'').trim();
+  if(!v) return '';
+  if(v.includes('drive.google.com/thumbnail?id=')) return v;
+  const m1=v.match(/[?&]id=([^&]+)/);
+  if(v.includes('drive.google.com')&&m1) return `https://drive.google.com/thumbnail?id=${m1[1]}&sz=w400`;
+  const m2=v.match(/\/file\/d\/([^/]+)/);
+  if(v.includes('drive.google.com')&&m2) return `https://drive.google.com/thumbnail?id=${m2[1]}&sz=w400`;
+  return v;
+}
+
+function renderProducts(){
+  const grid=document.getElementById('pgrid');
+  const srch=document.getElementById('srch').value.toLowerCase();
+  let list=products.filter(p=>p.category===curTab);
+  if(srch) list=list.filter(p=>p.name.toLowerCase().includes(srch)||(p.size||'').includes(srch));
+
+  if(!list.length){
+    grid.innerHTML=`<div style="grid-column:1/-1;text-align:center;padding:36px;color:var(--muted);font-size:13px">
+      Bu sayfada ürün yok.<br><br>
+      <button class="btn btn-primary btn-sm" onclick="openAddProduct()">＋ Ürün Ekle</button></div>`;
+    return;
+  }
+  grid.innerHTML='';
+  list.forEach(p=>{
+    const q=order[p.id]||0;
+    const img=normImg(p.image_url);
+    const d=document.createElement('div');
+    d.className='pcard'+(q>0?' sel':'');
+    d.id='pc_'+p.id;
+    const imgH=img
+      ?`<img class="pimg" src="${img}" alt="${esc(p.name)}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`+
+        `<div class="pph" style="display:none">${p.emoji||'📦'}</div>`
+      :`<div class="pph">${p.emoji||'📦'}</div>`;
+    d.innerHTML=imgH+`<div class="pinfo">
+      <div class="pname">${esc(p.name)}</div>
+      <div class="pmeta">${p.size||''} ${p.unit||''}</div>
+      <div class="pqrow">
+        <button class="qbtn" onclick="chQ('${p.id}',-1,event)">−</button>
+        <input class="qval${q>0?' hi':''}" type="number" min="0" value="${q}"
+          onchange="setQ('${p.id}',this.value)" onclick="event.stopPropagation()">
+        <button class="qbtn" onclick="chQ('${p.id}',1,event)">＋</button>
+      </div></div>`;
+    d.onclick=e=>{
+      if(['qbtn','qval'].some(c=>e.target.classList.contains(c))) return;
+      chQ(p.id,1,e);
+    };
+    grid.appendChild(d);
+  });
+}
+
+function chQ(pid,delta,e){
+  if(e)e.stopPropagation();
+  const n=Math.max(0,(order[pid]||0)+delta);
+  order[pid]=n; if(!n) delete order[pid];
+  const c=document.getElementById('pc_'+pid);
+  if(c){c.classList.toggle('sel',n>0);const i=c.querySelector('.qval');if(i){i.value=n;i.classList.toggle('hi',n>0);}}
+  renderOrder();
+}
+function setQ(pid,val){
+  const n=Math.max(0,parseInt(val)||0);
+  order[pid]=n; if(!n) delete order[pid];
+  const c=document.getElementById('pc_'+pid);
+  if(c){c.classList.toggle('sel',n>0);const i=c.querySelector('.qval');if(i) i.classList.toggle('hi',n>0);}
+  renderOrder();
+}
+
+/* ══════════════════════════════════════════════
+   ORDER
+══════════════════════════════════════════════ */
+function renderOrder(){
+  const list=document.getElementById('olist');
+  const keys=Object.keys(order).filter(id=>order[id]>0);
+  if(!keys.length){list.innerHTML='<div class="oempty">Henüz ürün seçilmedi</div>';return;}
+  list.innerHTML=keys.map(id=>{
+    const p=products.find(x=>x.id===id); if(!p) return '';
+    const img=normImg(p.image_url);
+    return `<div class="oitem">
+      <div class="oimg">${img?`<img src="${img}" style="width:36px;height:36px;border-radius:7px;object-fit:cover" onerror="this.outerHTML='${p.emoji||'📦'}'">`:(p.emoji||'📦')}</div>
+      <div style="flex:1"><div class="oname">${esc(p.name)}</div>
+        <div class="oqty">${order[id]} ${p.unit||'adet'} · ${p.size||''}</div></div>
+      <button class="odel" onclick="chQ('${id}',-9999,event)">×</button>
+    </div>`;
+  }).join('');
+}
+
+function clearOrder(){
+  order={};
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('sel'));
+  document.querySelectorAll('.qval').forEach(i=>{i.value=0;i.classList.remove('hi');});
+  renderOrder();
+}
+
+function submitOrder(){
+  const pn=document.getElementById('projName').value.trim();
+  const pd=document.getElementById('projDate').value.trim();
+  const items=Object.keys(order).filter(id=>order[id]>0).map(id=>{
+    const p=products.find(x=>x.id===id);
+    return p?{name:p.name,size:p.size,unit:p.unit,qty:order[id]}:null;
+  }).filter(Boolean);
+  if(!pn){showFmsg('err','Proje adı giriniz');return;}
+  if(!items.length){showFmsg('err','En az bir ürün seçiniz');return;}
+  const btn=document.getElementById('subBtn');
+  btn.disabled=true;btn.textContent='Oluşturuluyor...';
+  if(typeof google!=='undefined'){
+    google.script.run
+      .withSuccessHandler(r=>{btn.disabled=false;btn.innerHTML='📄 PDF Oluştur';
+        if(r.ok)showFmsg('ok','PDF hazır!',r.pdfUrl);else showFmsg('err','Hata oluştu');})
+      .withFailureHandler(()=>{btn.disabled=false;btn.innerHTML='📄 PDF Oluştur';showFmsg('err','Sunucu hatası');})
+      .submitOrder({project_name:pn,created_at:pd,items});
+  } else {
+    setTimeout(()=>{btn.disabled=false;btn.innerHTML='📄 PDF Oluştur';
+      showFmsg('ok','✅ Test mod: PDF oluşturuldu');},1200);
+  }
+}
+
+function showFmsg(type,text,url){
+  const el=document.getElementById('omsg');
+  el.className='fmsg '+type; el.style.display='block';
+  el.innerHTML=text+(url?`<a class="plink" href="${url}" target="_blank">PDF aç →</a>`:'');
+}
+
+/* ══════════════════════════════════════════════
+   AI CHAT
+══════════════════════════════════════════════ */
+function addMsg(role,text){
+  const d=document.createElement('div');
+  d.className='msg '+role; d.innerHTML=text;
+  document.getElementById('msgs').appendChild(d);
+  document.getElementById('msgs').scrollTop=99999;
+  return d;
+}
+
+function clearChat(){
+  chatHist=[];document.getElementById('msgs').innerHTML='';
+  addMsg('ai','Merhaba! Ben Çöl X yapay zeka asistanıyım 🤖<br>Ürün siparişi verebilir, soru sorabilirsiniz.<br><b>Örnek:</b> "20 adet dirsek, 5 adet manşon istiyorum"');
+}
+
+function ckd(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+
+function toggleSpeak(){
+  speakEnabled=!speakEnabled;
+  document.getElementById('speakToggle').style.background=speakEnabled?'rgba(61,159,192,.25)':'';
+  document.getElementById('speakToggle').style.color=speakEnabled?'var(--accent)':'';
+}
+
+function speak(text){
+  if(!speakEnabled||!window.speechSynthesis) return;
+  const clean=text.replace(/<[^>]+>/g,'').replace(/[🤖✅📦↩️🔀🔗🚿]/g,'');
+  const u=new SpeechSynthesisUtterance(clean);
+  u.lang='tr-TR'; u.rate=0.95; u.pitch=1;
+  const voices=window.speechSynthesis.getVoices();
+  const trVoice=voices.find(v=>v.lang.startsWith('tr'));
+  if(trVoice) u.voice=trVoice;
+  window.speechSynthesis.speak(u);
+}
+
+async function sendChat(){
+  const inp=document.getElementById('cinput');
+  const txt=inp.value.trim(); if(!txt) return;
+  inp.value='';
+  addMsg('usr',esc(txt));
+  chatHist.push({role:'user',content:txt});
+  const typing=addMsg('typing','⋯');
+
+  const plist=products.map((p,i)=>`[${i}] ${p.name} (${p.size||''} ${p.unit||''}) — ${tabs.find(t=>t.id===p.category)?.name||'?'}`).join('\n');
+  const osum=Object.keys(order).filter(id=>order[id]>0).map(id=>{const p=products.find(x=>x.id===id);return p?`${p.name}:${order[id]}`:''}).filter(Boolean).join(', ')||'Boş';
+
+  const sys=`Sen "Çöl X" uygulamasının Türkçe AI asistanısın. Tesisat malzemeleri siparişi konusunda yardım ediyorsun.
+
+Ürün listesi:
+${plist}
+
+Mevcut sipariş: ${osum}
+
+Kullanıcı sipariş vermek istiyorsa (örn: "20 adet dirsek istiyorum") SADECE şu JSON'u döndür:
+{"action":"order","items":[{"index":0,"qty":5}],"message":"Siparişiniz alındı: ..."}
+
+Başka sorularda normal Türkçe yanıt ver. Kısa ve net ol. JSON döndürürken YALNIZCA JSON yaz.`;
+
+  const key=anthropicKey || (typeof google==='undefined'?'':'');
+  
+  if(!key){
+    typing.remove();
+    addMsg('ai','⚠️ Gemini API anahtarı ayarlanmamış.<br>Ayarlar (⚙️) → Gemini API Key kısmına girin.<br><a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent)">Buradan ücretsiz alın →</a>');
+    speak('API anahtarı ayarlanmamış');
+    chatHist.push({role:'assistant',content:'API anahtarı ayarlanmamış'});
+    return;
+  }
+
+  try{
+    // Build Gemini contents array from chat history
+    const contents=chatHist.map(m=>({
+      role: m.role==='assistant'?'model':'user',
+      parts:[{text: m.content}]
+    }));
+
+    const res=await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system_instruction:{parts:[{text:sys}]},
+        contents,
+        generationConfig:{maxOutputTokens:800,temperature:0.7}
+      })
+    });
+    const data=await res.json();
+    if(data.error){
+      typing.remove();
+      addMsg('ai','⚠️ API Hatası: '+data.error.message+'<br>Lütfen API anahtarını kontrol edin.');
+      return;
+    }
+    const raw=data.candidates?.[0]?.content?.parts?.[0]?.text||'Yanıt alınamadı';
+    typing.remove();
+    chatHist.push({role:'assistant',content:raw});
+
+    try{
+      const clean=raw.replace(/```json|```/g,'').trim();
+      if(clean.startsWith('{')){
+        const p=JSON.parse(clean);
+        if(p.action==='order'&&p.items){
+          const applied=[];
+          p.items.forEach(it=>{
+            const pr=products[it.index];
+            if(pr){order[pr.id]=(order[pr.id]||0)+it.qty;applied.push(`${pr.name} — ${it.qty} ${pr.unit||'adet'}`);}
+          });
+          renderOrder(); renderProducts();
+          const rText=`✅ Siparişe eklendi:<br>${applied.map(a=>`• ${a}`).join('<br>')}`;
+          const rm=addMsg('action',rText);
+          speak(p.message||'Siparişiniz eklendi');
+          return;
+        }
+      }
+    }catch(e){}
+
+    const rm=addMsg('ai',raw.replace(/\n/g,'<br>'));
+    speak(raw);
+  }catch(err){
+    typing.remove();
+    addMsg('ai','Bağlantı hatası: '+err.message);
+  }
+}
+
+/* ══════════════════════════════════════════════
+   VOICE INPUT
+══════════════════════════════════════════════ */
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    alert('Tarayıcınız ses tanımayı desteklemiyor. Chrome veya Edge kullanın.'); return;
+  }
+  isRec?stopVoice():startVoice();
+}
+
+function startVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.lang='tr-TR'; recognition.continuous=false; recognition.interimResults=false;
+  isRec=true;
+  document.getElementById('voiceBtn').classList.add('rec');
+  document.getElementById('vbtxt').textContent='Durdurun';
+  addMsg('ai','🎙️ Dinliyorum...');
+  recognition.onresult=e=>{
+    const t=e.results[0][0].transcript;
+    stopVoice();
+    document.getElementById('cinput').value=t;
+    sendChat();
+  };
+  recognition.onerror=e=>{stopVoice();addMsg('ai','Ses hatası: '+e.error);};
+  recognition.onend=()=>{if(isRec)stopVoice();};
+  recognition.start();
+}
+
+function stopVoice(){
+  isRec=false;
+  document.getElementById('voiceBtn').classList.remove('rec');
+  document.getElementById('vbtxt').textContent='Sesli Sipariş';
+  try{recognition?.stop();}catch(e){}
+}
+
+/* ══════════════════════════════════════════════
+   PRODUCT CRUD
+══════════════════════════════════════════════ */
+function openAddProduct(){
+  document.getElementById('pmTitle').textContent='Ürün Ekle';
+  document.getElementById('eid').value='';
+  ['pn','ps','pu','pimg','pem'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pu').value='adet';
+  document.getElementById('pimgpv').style.display='none';
+  const sel=document.getElementById('pcat');
+  sel.innerHTML=tabs.map(t=>`<option value="${t.id}">${t.icon} ${t.name}</option>`).join('');
+  if(curTab) sel.value=curTab;
+  cm('adminModal');
+  document.getElementById('pmModal').style.display='flex';
+}
+
+function openEditProduct(pid){
+  const p=products.find(x=>x.id===pid); if(!p) return;
+  document.getElementById('pmTitle').textContent='Ürün Düzenle';
+  document.getElementById('eid').value=pid;
+  document.getElementById('pn').value=p.name;
+  document.getElementById('ps').value=p.size||'';
+  document.getElementById('pu').value=p.unit||'adet';
+  document.getElementById('pimg').value=p.image_url||'';
+  document.getElementById('pem').value=p.emoji||'';
+  const sel=document.getElementById('pcat');
+  sel.innerHTML=tabs.map(t=>`<option value="${t.id}">${t.icon} ${t.name}</option>`).join('');
+  sel.value=p.category||'';
+  prvImg();
+  cm('adminModal');
+  document.getElementById('pmModal').style.display='flex';
+}
+
+function prvImg(){
+  const url=normImg(document.getElementById('pimg').value);
+  const pv=document.getElementById('pimgpv');
+  if(url){pv.src=url;pv.style.display='block';}else pv.style.display='none';
+}
+
+function saveProd(){
+  const name=document.getElementById('pn').value.trim();
+  if(!name){alert('Ürün adı zorunlu');return;}
+  const eid=document.getElementById('eid').value;
+  const d={name,size:document.getElementById('ps').value.trim(),
+    unit:document.getElementById('pu').value.trim()||'adet',
+    category:document.getElementById('pcat').value,
+    image_url:document.getElementById('pimg').value.trim(),
+    emoji:document.getElementById('pem').value.trim()||'📦'};
+  if(eid){
+    const i=products.findIndex(p=>p.id===eid);
+    if(i>-1) products[i]={...products[i],...d};
+  } else {
+    d.id='p_'+Date.now();
+    products.push(d);
+  }
+  persist(); cm('pmModal'); renderTabs(); renderProducts();
+  openAdmin();
+}
+
+function delProd(pid){
+  if(!confirm('Bu ürünü silmek istediğinizden emin misiniz?')) return;
+  products=products.filter(p=>p.id!==pid);
+  delete order[pid];
+  persist(); renderTabs(); renderProducts(); renderOrder(); renderAdmin();
+}
+
+/* ══════════════════════════════════════════════
+   ADMIN
+══════════════════════════════════════════════ */
+function openAdmin(){
+  const sel=document.getElementById('afcat');
+  sel.innerHTML='<option value="">Tüm Sayfalar</option>'+
+    tabs.map(t=>`<option value="${t.id}">${t.icon} ${t.name}</option>`).join('');
+  renderAdmin();
+  document.getElementById('adminModal').style.display='flex';
+}
+
+function renderAdmin(){
+  const cat=document.getElementById('afcat').value;
+  let list=cat?products.filter(p=>p.category===cat):products;
+  document.getElementById('acnt').textContent=list.length+' ürün';
+  const g=document.getElementById('agrid');
+  if(!list.length){g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:28px;color:var(--muted);font-size:13px">Ürün bulunamadı</div>';return;}
+  g.innerHTML=list.map(p=>{
+    const img=normImg(p.image_url);
+    return `<div class="acard">
+      ${img?`<img src="${img}" onerror="this.outerHTML='<div class=\\'aph\\'>${p.emoji||'📦'}</div>'">`:
+        `<div class="aph">${p.emoji||'📦'}</div>`}
+      <div class="acinfo">
+        <div class="acname">${esc(p.name)}</div>
+        <div class="acmeta">${p.size||''} ${p.unit||''} · ${tabs.find(t=>t.id===p.category)?.name||'?'}</div>
+      </div>
+      <div class="acact">
+        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="openEditProduct('${p.id}')">✏️ Düzenle</button>
+        <button class="btn btn-danger btn-sm" onclick="delProd('${p.id}')">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════
+   SETTINGS
+══════════════════════════════════════════════ */
+function openSettings(){
+  document.getElementById('stAppName').value=document.getElementById('navTitle').textContent;
+  document.getElementById('stLogo').value=document.getElementById('navLogo').src||'';
+  document.getElementById('stIcon').value='';
+  document.getElementById('stApiKey').value=anthropicKey||'';
+  document.getElementById('settModal').style.display='flex';
+}
+
+function saveSettings(){
+  const name=document.getElementById('stAppName').value.trim()||'Çöl X App';
+  const logo=document.getElementById('stLogo').value.trim();
+  const icon=document.getElementById('stIcon').value.trim();
+  const key=document.getElementById('stApiKey').value.trim();
+
+  document.title=name;
+  document.getElementById('navTitle').textContent=name;
+  document.getElementById('appTitleMeta').setAttribute('content',name);
+  if(logo){document.getElementById('navLogo').src=logo;document.getElementById('navLogo').style.display='block';}
+  if(icon){document.getElementById('appFavicon').href=icon;document.getElementById('appTouchIcon').href=icon;}
+  if(key) anthropicKey=key;
+
+  try{localStorage.setItem(SK_SETT,JSON.stringify({appName:name,logo,icon,apiKey:key}));}catch(e){}
+
+  if(typeof google!=='undefined'){
+    google.script.run.saveSettings({app_name:name,logo_url:logo,app_icon_url:icon,anthropic_api_key:key});
+  }
+  cm('settModal');
+}
+
+/* ══════════════════════════════════════════════
+   MODAL HELPERS
+══════════════════════════════════════════════ */
+function cm(id){document.getElementById(id).style.display='none';}
+function mbg(e,id){if(e.target===document.getElementById(id))cm(id);}
+function esc(t){return String(t??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+function init(){
+  loadLocal();
+  const d=new Date();
+  document.getElementById('projDate').value=
+    d.getFullYear()+'/'+(''+(d.getMonth()+1)).padStart(2,'0')+'/'+(''+(d.getDate())).padStart(2,'0');
+
+  if(tabs.length) switchTab(tabs[0].id);
+  renderTabs();
+  clearChat();
+
+  if(typeof google!=='undefined'){
+    google.script.run
+      .withSuccessHandler(cfg=>{
+        if(cfg.products) products=cfg.products;
+        if(cfg.tabs) tabs=cfg.tabs;
+        if(cfg.app_name){document.title=cfg.app_name;document.getElementById('navTitle').textContent=cfg.app_name;}
+        if(cfg.logo_url){document.getElementById('navLogo').src=cfg.logo_url;document.getElementById('navLogo').style.display='block';}
+        if(cfg.app_icon_url){document.getElementById('appFavicon').href=cfg.app_icon_url;document.getElementById('appTouchIcon').href=cfg.app_icon_url;}
+        if(cfg.anthropic_key) anthropicKey=cfg.anthropic_key;
+        if(cfg.today) document.getElementById('projDate').value=cfg.today;
+        renderTabs();
+        if(tabs.length) switchTab(tabs[0].id);
+      })
+      .withFailureHandler(()=>{})
+      .getAppConfig();
+  }
+}
+
+init();
+</script>
+</body>
+</html>
